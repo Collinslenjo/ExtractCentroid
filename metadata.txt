@@ -1,0 +1,17 @@
+[general]
+name=ExtractCentroid
+qgisMinimumVersion=1.8
+qgisMaximumVersion=2.99
+description=This is a plugin to extract centroid
+version=version 1.0
+author=Collins Lenjo
+email=collinslenjo.cl@gmail.com
+changelog=this is just version 1
+tags=  extract centroid, spaced tag , tag
+tracker=http://bugs.itopen.it/changed
+homepage=http://www.itopen.it/changed
+repository=http://www.itopen.it/changedrepo
+category=web
+experimental=False
+about=it just Extracts Centroid.
+icon=icons/icon.png
