@@ -3,7 +3,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
-import os
+import os,csv
 
 
 class ExtractCentroid:
@@ -32,21 +32,22 @@ class ExtractCentroid:
 			mem_layer = QgsVectorLayer(uri,'point','memory')
 			prov = mem_layer.dataProvider()
 			i = 0
-			features = {}
+			myData = [['code', 'X', 'Y']]
 			for f in new_layer.getFeatures():
 				feat = QgsFeature()
 				point = f.geometry().centroid().asPoint()
-				features["code"] = f["code"]
-				features["X"] = point[0]
-				features["Y"] = point[1]
-				print(features)
+				myData.append([f["code"], point[0], point[1]])
 				feat.setAttributes([i])
 				feat.setGeometry(QgsGeometry.fromPoint(point))
 				prov.addFeatures([feat])
 				i += 1
+			myFile = open(dir_path+'/centroid.csv', 'w')
+			with myFile:
+				writer = csv.writer(myFile)
+				writer.writerows(myData)
 			QgsMapLayerRegistry.instance().addMapLayer(new_layer)
 			QgsMapLayerRegistry.instance().addMapLayer(mem_layer)
-			QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid"), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid"))
+			QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid"), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid\n check the file "+dir_path+"/centroid.csv"))
 		return
 
 if __name__ == "__main__":
