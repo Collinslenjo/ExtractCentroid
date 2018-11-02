@@ -3,6 +3,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+import os
 
 
 class ExtractCentroid:
@@ -19,14 +20,32 @@ class ExtractCentroid:
 		self.iface.removePluginMenu("ExtractCentroid",self.action)
 
 	def extract_centroid(self):
-		new_layer = QgsVectorLayer("./sampledata/sample_data.shp", "polygons", "ogr")
+		dir_path = os.path.dirname(os.path.realpath(__file__))
+		new_layer = QgsVectorLayer(dir_path+"/sampledata/sample_data.shp", "polygons", "ogr")
 		if not new_layer:
 			print "Layer failed to load!"
 		else:
 			print "Layer has been loaded"
-			layer_shape = QgsMapLayerRegistry.instance().addMapLayers([new_layer])
-			for feature in layer_shape.getFeatures():
-				feature.geometry().centroid()
+			new_layer.isValid()
+			epsg = new_layer.crs().postgisSrid()
+			uri = "Point?crs=epsg:" + str(epsg) + "&field=id:integer""&index=yes"
+			mem_layer = QgsVectorLayer(uri,'point','memory')
+			prov = mem_layer.dataProvider()
+			i = 0
+			features = {}
+			for f in new_layer.getFeatures():
+				feat = QgsFeature()
+				point = f.geometry().centroid().asPoint()
+				features["code"] = f["code"]
+				features["X"] = point[0]
+				features["Y"] = point[1]
+				print(features)
+				feat.setAttributes([i])
+				feat.setGeometry(QgsGeometry.fromPoint(point))
+				prov.addFeatures([feat])
+				i += 1
+			QgsMapLayerRegistry.instance().addMapLayer(new_layer)
+			QgsMapLayerRegistry.instance().addMapLayer(mem_layer)
 			QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid"), QCoreApplication.translate('ExtractCentroid', "Extracted Centroid"))
 		return
 
